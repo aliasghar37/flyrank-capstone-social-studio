@@ -1,0 +1,9 @@
+node_modules
+dist
+.next
+coverage
+pnpm-lock.yaml
+*.md
+db/**/*.sql
+db/social_studio_master_erd.html
+**/next-env.d.ts

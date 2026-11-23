@@ -1,0 +1,39 @@
+{
+  "name": "flyrank-capstone-social-studio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.11.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @studio/shared build && pnpm --parallel --filter @studio/api --filter @studio/worker --filter @studio/web dev",
+    "build": "pnpm -r build",
+    "start": "pnpm --parallel --filter @studio/api --filter @studio/worker --filter @studio/web start",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "pnpm --filter @studio/shared build && pnpm -r typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:migrate": "sh ./db/migrate.sh",
+    "db:seed": "tsx scripts/seed.ts",
+    "demo:crash": "tsx scripts/demo-crash.ts",
+    "clean": "pnpm -r --if-present clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^24.19.2",
+    "@types/pg": "^8.23.1",
+    "dotenv": "^18.0.10",
+    "eslint": "^9.39.5",
+    "globals": "^17.14.0",
+    "pg": "^8.23.1",
+    "prettier": "^3.10.1",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.73.0",
+    "vitest": "^5.1.1"
+  }
+}

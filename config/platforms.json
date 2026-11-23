@@ -1,0 +1,9 @@
+{
+  "enabled": ["telegram", "discord", "x", "linkedin"],
+  "adapters": {
+    "telegram": "telegram",
+    "discord": "discord",
+    "x": "mock_x",
+    "linkedin": "mock_linkedin"
+  }
+}
