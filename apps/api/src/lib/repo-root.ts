@@ -1,11 +1,7 @@
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
-/**
- * Find the monorepo root by walking up to the pnpm workspace file.
- * Keeps config paths stable whether a process starts from the repo root,
- * an app directory, or a compiled dist directory.
- */
+// Walks up to pnpm-workspace.yaml so config paths work from any cwd.
 export function findRepoRoot(start: string = process.cwd()): string {
   let current = start;
 

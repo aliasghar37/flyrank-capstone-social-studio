@@ -1,9 +1,5 @@
 # Design — Social Media Studio
 
-> **Phase 1 gate document.** Sources: the FlyRank capstone brief (governs) and
-> `SOCIAL_MEDIA_STUDIO_PROJECT_SPEC_v1.1.md` (implementation detail).
-> Status: ready for build · 2026-11-23
-
 ## Problem
 
 A team publishes a blog post and must hand-rewrite it for every social platform, remember
@@ -21,12 +17,11 @@ multi-platform campaign without a full social-media management suite.
 
 ## Scope and non-goal
 
-**Core (graded, mandatory):** ingestion, constraint-enforced generation, review workflow,
+**Core:** ingestion, constraint-enforced generation, review workflow,
 adapter layer, idempotent scheduling and publish history.
 
-**Optional spec additions (never gate the core):** Discord real adapter (E1), grounding
-check (E2), Clerk auth with `AUTH_MODE=dev` bypass (E3), Next.js dashboard (E4), LangGraph
-repair loop (E5).
+**Optional, after the core works:** Discord adapter, grounding check, Clerk auth (with an
+`AUTH_MODE=dev` bypass), Next.js dashboard, LangGraph repair loop.
 
 **Explicit non-goal:** This project will **not** generate images, track analytics or
 engagement, or publish to real X, LinkedIn, or Instagram accounts. It is the reliable
@@ -60,9 +55,9 @@ Base `/api`, JSON in/out, errors as `{error:{code,message,details}}`.
 | `POST /api/posts` | ingest `{url}` or `{markdown,title,canonicalUrl?}` |
 | `GET /api/posts`, `GET /api/posts/:id` | list / read posts |
 | `POST /api/posts/:id/generate` | generate variants for enabled platforms |
-| `GET/POST /api/posts/:id/variants` | list / create manually (Probe 2) |
+| `GET/POST /api/posts/:id/variants` | list / create manually |
 | `GET/PATCH /api/variants/:id` | read / edit (edit resets to `draft`) |
-| `POST /api/variants/:id/approve` · `/reject` · `/schedule` | review + schedule (Probes 3–4) |
+| `POST /api/variants/:id/approve` · `/reject` · `/schedule` | review + schedule |
 | `GET /api/slots`, `GET /api/slots/:id`, `DELETE /api/slots/:id` | calendar / cancel |
 | `POST /api/slots/:id/resolve` | resolve an `uncertain` slot |
 | `GET /api/history`, `GET /api/generation-runs` | history / blocked output |
@@ -118,6 +113,6 @@ send becomes `uncertain` for human resolution, never a duplicate.
 
 `routes → services → repositories → PostgreSQL`; a separate worker consumes BullMQ jobs;
 adapters sit behind the registry. Node.js + Express + TypeScript, PostgreSQL 16,
-Redis/BullMQ, Docker Compose. Template generation works with zero keys; Groq is optional.
-`AUTH_MODE=dev` keeps the system runnable without keys. Full diagrams and state machines:
+Redis/BullMQ, Docker Compose. Template generation and `AUTH_MODE=dev` need no API keys;
+Groq is optional. Full diagrams and state machines:
 `docs/architecture.md`.

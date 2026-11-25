@@ -20,11 +20,7 @@ export interface ConstraintProfile {
   };
 }
 
-/**
- * Rule ids returned by the validator. Every violation names one of these.
- * The validator itself lands in Phase 2; the ids are fixed now so API errors
- * and tests cannot drift.
- */
+// Rule ids reported by the validator for each violation.
 export const RULE_IDS = [
   'max_length',
   'min_length',
@@ -42,10 +38,7 @@ export type RuleId = (typeof RULE_IDS)[number];
 
 const BANNED_PHRASES = ['game-changer', 'revolutionary', 'click here', "you won't believe"];
 
-/**
- * Starting values. They sit at or below each platform's hard cap so a real
- * adapter can never reject an approved variant for length.
- */
+// Limits are kept at or below each platform's own maximum.
 export const PROFILES: Record<Platform, ConstraintProfile> = {
   x: {
     platform: 'x',

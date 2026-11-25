@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: studio
       POSTGRES_DB: studio
     ports:
-      - '5432:5432'
+      - '${POSTGRES_HOST_PORT:-5432}:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -21,7 +21,7 @@ services:
     image: redis:7-alpine
     command: ['redis-server', '--appendonly', 'yes']
     ports:
-      - '6379:6379'
+      - '${REDIS_HOST_PORT:-6379}:6379'
     volumes:
       - redisdata:/data
     healthcheck:
@@ -51,7 +51,7 @@ services:
       GROQ_API_KEY: ${GROQ_API_KEY:-}
       LLM_MODEL: ${LLM_MODEL:-llama-3.3-70b-versatile}
     ports:
-      - '4000:4000'
+      - '${API_HOST_PORT:-4000}:4000'
     depends_on:
       postgres:
         condition: service_healthy
@@ -107,7 +107,7 @@ services:
       NODE_ENV: ${NODE_ENV:-development}
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
     ports:
-      - '3000:3000'
+      - '${WEB_HOST_PORT:-3000}:3000'
     depends_on:
       api:
         condition: service_healthy

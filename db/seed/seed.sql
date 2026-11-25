@@ -1,6 +1,5 @@
 -- Demo data for dev_user: one post with variants in draft / approved / rejected.
--- Safe to re-run. Hash here is sha256 of the raw text; the app must hash the same way
--- (or normalize identically) or re-ingesting this post won't be detected as a duplicate.
+-- Safe to re-run. content_hash is sha256 of content_markdown, same as the API.
 
 BEGIN;
 

@@ -6,15 +6,9 @@ export interface PublishJobData {
   attemptCount: number;
 }
 
-/**
- * Phase 4 fills this in with the real flow:
- *   atomic claim -> verify variant still approved -> attempt journal ->
- *   mark request_sent -> adapter.publish -> success transaction.
- *
- * Until then it throws so a scaffold can never silently report a successful
- * publish.
- */
+// TODO: claim slot, re-check approval, write attempt, mark request_sent,
+// call adapter, record result. Throws for now so nothing is marked published.
 export async function processPublishSlot(job: Job<PublishJobData>): Promise<void> {
   logger.warn({ jobId: job.id, slotId: job.data.slotId }, 'publish processor not implemented');
-  throw new Error('Publish processor is not implemented yet (Phase 4)');
+  throw new Error('Publish processor not implemented');
 }

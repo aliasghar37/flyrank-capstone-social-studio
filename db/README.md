@@ -1,6 +1,6 @@
 # Database — Social Media Studio
 
-PostgreSQL 16. Plain SQL migrations, tested against a live Postgres 16 instance.
+PostgreSQL 16, plain SQL migrations.
 
 ```
 db/
@@ -23,9 +23,7 @@ DATABASE_URL=postgresql://studio:studio@localhost:5432/studio ./db/migrate.sh
 psql "$DATABASE_URL" -f db/seed/seed.sql
 ```
 
-In Docker, have the `api` container run `migrate.sh` on start (the image needs `postgresql-client`).
-Using Prisma? Apply these files, then run `prisma db pull` to generate the client. Don't let Prisma
-own the migrations: it can't express the partial unique indexes, the generated column or the triggers.
+With Docker Compose, the `api` container runs `migrate.sh` on start.
 
 ## Entity map
 
@@ -61,13 +59,13 @@ posts 1──* variants 1──* slots 1──* publish_attempts
 | `SS002` | variant published | 409 `VARIANT_PUBLISHED_IMMUTABLE` |
 | `SS004` / `SS005` / `SS006` | slot / attempt / post guard | 409 (indicates an app bug; log it) |
 | `23505` | `slots_one_active_per_variant_uq` | 409 `VARIANT_ALREADY_SCHEDULED` |
-| `23505` | `posts_owner_hash_uq` | 409 duplicate post (return existing id) |
+| `23505` | `posts_owner_hash_uq` | not raised: ingest returns the existing post with `200` |
 | `23505` | `variants_live_platform_uq` | 409 live variant exists |
 | `23503` | any `*_fk` | 404 (other owner's data or missing) |
 
-Check the API's own guards first so users get clean messages; the DB errors are the safety net.
+The API checks these rules itself first; the database errors are a backstop.
 
-## Rules for the app code
+## Conventions
 
 - **Fence every write after the claim** on `claim_token`. 0 rows affected = lease lost; stop and never call the adapter.
 - **Success transaction order:** slot → attempt → variant (the variant trigger checks for a published slot).
@@ -76,7 +74,7 @@ Check the API's own guards first so users get clean messages; the DB errors are 
 - **Regenerate** (`?regenerate=true`): reject the old drafts (`rejection_reason = 'superseded'`) instead of deleting them.
 - **Content hash:** hash exactly what you store in `content_markdown` (sha256 hex), or normalize the same way everywhere.
 
-## Changes from spec §10
+## Notes on the schema
 
 - Status columns use `CHECK` instead of `ENUM` types, so values can change without `ALTER TYPE`.
 - Platform, adapter and engine keys are format-checked, not listed, so a new adapter needs no migration.
@@ -91,4 +89,4 @@ Check the API's own guards first so users get clean messages; the DB errors are 
 
 `roles.sql` creates `studio_app` with no `DELETE`/`TRUNCATE`, so the app can't erase history.
 Use it with two URLs: `MIGRATION_DATABASE_URL` (owner) for migrations, `DATABASE_URL` (studio_app) at runtime.
-Skip it if time is short; the default single user works.
+Without it, everything runs as the single `studio` user.

@@ -1,7 +1,4 @@
-/**
- * Domain vocabulary shared by the API, worker and dashboard.
- * These values mirror the PostgreSQL CHECK constraints in db/migrations/.
- */
+// Shared domain types. Status values match the CHECK constraints in db/migrations.
 
 export const PLATFORMS = ['telegram', 'discord', 'x', 'linkedin'] as const;
 export type Platform = (typeof PLATFORMS)[number];
@@ -74,10 +71,7 @@ export class PublishError extends Error {
   }
 }
 
-/**
- * The one seam between business logic and every platform.
- * Business code must depend on this interface only, never on an implementation.
- */
+// Implemented by every publisher adapter. Callers depend only on this interface.
 export interface SocialPublisher {
   readonly key: string;
   readonly supportsIdempotentLookup: boolean;

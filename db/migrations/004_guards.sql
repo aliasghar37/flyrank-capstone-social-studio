@@ -1,5 +1,4 @@
--- State-machine guards. The API checks these rules first and returns clean errors;
--- the triggers make sure a bug or a race can never break them.
+-- State-machine guards. The API validates first; these triggers are the backstop.
 
 -- Posts are the source of truth: immutable once stored.
 CREATE OR REPLACE FUNCTION guard_post_update() RETURNS trigger

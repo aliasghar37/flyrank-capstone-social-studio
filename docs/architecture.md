@@ -1,8 +1,6 @@
 # Architecture
 
-Detailed companion to `docs/DESIGN.md`. Diagrams are written in Mermaid so they render on
-GitHub. The brief's architecture diagram requirement is satisfied by the README, which links
-here.
+Detailed diagrams for `docs/DESIGN.md`, written in Mermaid.
 
 ## 1. System flow
 

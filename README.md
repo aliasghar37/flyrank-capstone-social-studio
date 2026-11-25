@@ -3,10 +3,8 @@
 Turn one blog post into a reviewed, scheduled multi-platform campaign. A person approves each
 platform-specific variant, and a durable scheduler publishes it **one time, never twice**.
 
-> **Project status:** Phase 1 (design) is complete and the monorepo scaffold is in place.
-> The API currently exposes `/health` and `/api/platforms`; ingestion, generation, review,
-> scheduling and publishing arrive in Phases 2–5. See [`BUILDLOG.md`](BUILDLOG.md) and
-> [`EVIDENCE.md`](EVIDENCE.md) for the honest build state.
+> **Status:** work in progress. Post ingestion is implemented; generation, review and
+> publishing are not implemented yet.
 
 ## Why this exists
 
@@ -97,8 +95,7 @@ Open:
 - API health: <http://localhost:4000/health>
 - Platform profiles: <http://localhost:4000/api/platforms>
 
-The zero-key defaults (`AUTH_MODE=dev`, `LLM_PROVIDER=template`) are enough to run the
-scaffold. Real Telegram/Discord publishing needs your own bot or webhook values in `.env`.
+The defaults (`AUTH_MODE=dev`, `LLM_PROVIDER=template`) need no API keys. Real Telegram/Discord publishing needs your own bot or webhook values in `.env`.
 
 ## Local development (without rebuilding containers)
 
@@ -126,10 +123,26 @@ pnpm dev
 | `pnpm typecheck` | Build shared, then typecheck all packages |
 | `pnpm lint` | ESLint |
 | `pnpm format` | Prettier write |
-| `pnpm test` | Vitest |
+| `pnpm test` | Vitest (set `TEST_DATABASE_URL` to include the database tests) |
 | `pnpm db:migrate` | Apply PostgreSQL migrations |
 | `pnpm db:seed` | Seed the demo post and variants |
-| `pnpm demo:crash` | Crash-recovery demo (Phase 5) |
+| `pnpm demo:crash` | Crash-recovery demo (not implemented yet) |
+
+## Ingesting a post
+
+```bash
+# Pasted Markdown
+curl -s localhost:4000/api/posts -H 'content-type: application/json' \
+  -d '{"markdown":"# My post\n\nBody text","canonicalUrl":"https://example.com/my-post"}'
+
+# A public URL (article text is extracted from the page)
+curl -s localhost:4000/api/posts -H 'content-type: application/json' \
+  -d '{"url":"https://example.com/blog/post"}'
+```
+
+A new post returns `201`. Sending the same content again returns `200` with the existing post
+(`"created": false`). URL fetching only allows public http(s) addresses, follows at most 3
+redirects, and stops after 10 seconds or 2 MB.
 
 ## Current API
 
@@ -137,11 +150,13 @@ pnpm dev
 |---|---|
 | `GET /health` | Implemented — checks PostgreSQL and Redis |
 | `GET /api/platforms` | Implemented — enabled platforms, adapter map, profiles |
-| `POST /api/posts`, generation, review, scheduling, history | Planned for Phases 2–5 |
+| `POST /api/posts` | Implemented — ingest `{ "url" }` or `{ "markdown", "title?", "canonicalUrl?" }` |
+| `GET /api/posts`, `GET /api/posts/:id` | Implemented — list and read stored posts |
+| Generation, review, scheduling, history | Not implemented yet |
 
 ## Known limitations
 
-- This is a scaffold: feature endpoints and dashboard pages are not implemented yet.
+- Generation, review, scheduling and dashboard pages are not implemented yet.
 - Auth middleware and Clerk are not wired; `AUTH_MODE=dev` is the only working path.
 - Real adapters need your own Telegram bot or Discord webhook. Without them, use mock adapters.
 - Real Telegram/Discord publishing is **at-most-once** in the ambiguity window: an unrecorded
@@ -150,8 +165,8 @@ pnpm dev
 
 ## Documentation
 
-- [`docs/DESIGN.md`](docs/DESIGN.md) — Phase 1 gate document.
+- [`docs/DESIGN.md`](docs/DESIGN.md) — one-page design.
 - [`docs/architecture.md`](docs/architecture.md) — diagrams, state machines, idempotency.
 - [`db/README.md`](db/README.md) — schema, database-enforced guarantees, error mapping.
-- [`EVIDENCE.md`](EVIDENCE.md) — requirement proofs (filled as phases land).
+- [`EVIDENCE.md`](EVIDENCE.md) — requirement proofs.
 - [`BUILDLOG.md`](BUILDLOG.md) — AI-usage log.
