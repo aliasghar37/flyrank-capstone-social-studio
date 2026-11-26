@@ -3,8 +3,8 @@
 Turn one blog post into a reviewed, scheduled multi-platform campaign. A person approves each
 platform-specific variant, and a durable scheduler publishes it **one time, never twice**.
 
-> **Status:** work in progress. Post ingestion is implemented; generation, review and
-> publishing are not implemented yet.
+> **Status:** work in progress. Ingestion, variant generation and constraint validation are
+> implemented; review and publishing are not implemented yet.
 
 ## Why this exists
 
@@ -144,6 +144,25 @@ A new post returns `201`. Sending the same content again returns `200` with the 
 (`"created": false`). URL fetching only allows public http(s) addresses, follows at most 3
 redirects, and stops after 10 seconds or 2 MB.
 
+## Generating variants
+
+```bash
+curl -s -X POST localhost:4000/api/posts/$POST_ID/generate
+```
+
+The response lists the stored `variants` (status `draft`), any `blocked` platforms with the
+rules they broke, and `skipped` platforms that already have a live variant. Every variant is
+checked by the validator in `packages/shared/src/validator.ts` before it is stored; a variant
+that breaks a rule is never stored and is logged in `generation_runs`.
+
+A hand-written variant goes through the same check:
+
+```bash
+curl -s localhost:4000/api/posts/$POST_ID/variants -H 'content-type: application/json' \
+  -d '{"platform":"x","body":"Way too long ... #a #b #c"}'
+# 422 {"error":{"code":"CONSTRAINT_VIOLATION","message":"Variant violates 2 rule(s) for platform 'x': max_length, hashtag_count", "details":[{"rule":"max_length","limit":280,"actual":412,...}]}}
+```
+
 ## Current API
 
 | Endpoint | Status |
@@ -152,11 +171,16 @@ redirects, and stops after 10 seconds or 2 MB.
 | `GET /api/platforms` | Implemented — enabled platforms, adapter map, profiles |
 | `POST /api/posts` | Implemented — ingest `{ "url" }` or `{ "markdown", "title?", "canonicalUrl?" }` |
 | `GET /api/posts`, `GET /api/posts/:id` | Implemented — list and read stored posts |
-| Generation, review, scheduling, history | Not implemented yet |
+| `POST /api/posts/:id/generate` | Implemented — one template variant per enabled platform (optional `{ "platforms": [...] }`) |
+| `GET /api/posts/:id/variants` | Implemented — list a post's variants |
+| `POST /api/posts/:id/variants` | Implemented — add a hand-written `{ "platform", "body" }`; `422` names each broken rule |
+| `GET /api/posts/:id/generation-runs` | Implemented — every generation attempt, including blocked output |
+| Review, scheduling, history | Not implemented yet |
 
 ## Known limitations
 
-- Generation, review, scheduling and dashboard pages are not implemented yet.
+- Review, scheduling and dashboard pages are not implemented yet.
+- Variants are generated from templates only; the optional Groq engine is not wired yet.
 - Auth middleware and Clerk are not wired; `AUTH_MODE=dev` is the only working path.
 - Real adapters need your own Telegram bot or Discord webhook. Without them, use mock adapters.
 - Real Telegram/Discord publishing is **at-most-once** in the ambiguity window: an unrecorded

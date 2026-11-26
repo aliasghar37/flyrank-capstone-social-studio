@@ -79,18 +79,6 @@ export interface SocialPublisher {
   findByIdempotencyKey?(key: string): Promise<PublishResult | null>;
 }
 
-export interface Violation {
-  rule: string;
-  limit?: number | string;
-  actual?: number | string;
-  message: string;
-}
-
-export interface ValidationResult {
-  passed: boolean;
-  violations: Violation[];
-}
-
 export interface ApiErrorBody {
   error: {
     code: string;

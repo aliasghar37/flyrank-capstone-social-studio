@@ -60,7 +60,7 @@ Base `/api`, JSON in/out, errors as `{error:{code,message,details}}`.
 | `POST /api/variants/:id/approve` · `/reject` · `/schedule` | review + schedule |
 | `GET /api/slots`, `GET /api/slots/:id`, `DELETE /api/slots/:id` | calendar / cancel |
 | `POST /api/slots/:id/resolve` | resolve an `uncertain` slot |
-| `GET /api/history`, `GET /api/generation-runs` | history / blocked output |
+| `GET /api/history`, `GET /api/posts/:id/generation-runs` | history / blocked output |
 | `GET /preview/:adapter/:id`, `GET /health`, `GET /api/platforms` | mock preview / liveness / profiles |
 
 Key refusals: unapproved schedule → `409 VARIANT_NOT_APPROVED`; past time →

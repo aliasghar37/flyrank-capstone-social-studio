@@ -9,9 +9,13 @@ import { logger } from './lib/logger.js';
 import { requireOwner } from './middleware/auth.js';
 import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
 import { createPostsRepository } from './repositories/posts.js';
+import { createVariantsRepository } from './repositories/variants.js';
 import { healthRouter } from './routes/health.js';
 import { platformsRouter } from './routes/platforms.js';
 import { createPostsRouter } from './routes/posts.js';
+import { createVariantsRouter } from './routes/variants.js';
+import { createGenerationService } from './services/generation-service.js';
+import { loadPlatformConfig } from './services/platform-config.js';
 import { createIngestService } from './services/ingest-service.js';
 
 export const app: Express = express();
@@ -27,6 +31,13 @@ app.use('/api', platformsRouter);
 
 const posts = createPostsRepository(pool);
 app.use('/api', requireOwner, createPostsRouter({ posts, ingest: createIngestService(posts) }));
+
+const generation = createGenerationService({
+  posts,
+  variants: createVariantsRepository(pool),
+  enabledPlatforms: loadPlatformConfig().enabled,
+});
+app.use('/api', requireOwner, createVariantsRouter({ generation }));
 
 app.use(notFoundHandler);
 app.use(errorHandler);
